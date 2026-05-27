@@ -1,0 +1,19 @@
+FROM debian:bullseye-20230109-slim AS builder
+
+RUN apt-get update && apt-get install -y curl
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+ENV PATH=$PATH:/root/.cargo/bin
+
+WORKDIR /app
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+RUN apt-get install -y build-essential libapt-pkg-dev
+COPY Cargo.toml Cargo.lock ./
+RUN cargo build --release
+RUN apt-get install -y file
+ADD src/ src/
+RUN touch src/* && cargo build --release
+RUN file ./target/release/apt-query && ls -lh ./target/release/apt-query && ./target/release/apt-query foo
+
+FROM scratch
+COPY --from=builder /app/target/release/apt-query /apt-query
+ENTRYPOINT ["/apt-query"]

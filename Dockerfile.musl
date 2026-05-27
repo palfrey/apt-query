@@ -1,0 +1,19 @@
+FROM alpine:edge AS builder
+ARG HOST=x86_64-unknown-linux-musl
+
+RUN apk add --no-cache rustup gcc g++ file musl-dev apt-dev
+RUN rustup-init -y --default-host $HOST --profile minimal
+ENV PATH=$PATH:/root/.cargo/bin
+
+WORKDIR /app
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+COPY Cargo.toml Cargo.lock ./
+RUN cargo build --release --target=$HOST
+ADD src/ src/
+RUN ls -l /usr/lib && touch src/* && cargo build --release --target=$HOST
+RUN file ./target/$HOST/release/apt-query && ls -lh ./target/$HOST/release/apt-query && ./target/$HOST/release/apt-query && exit 1
+
+FROM scratch
+ARG HOST=x86_64-unknown-linux-musl
+COPY --from=builder /app/target/$HOST/release/apt-query /apt-query
+ENTRYPOINT ["/apt-query"]
