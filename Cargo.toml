@@ -8,3 +8,4 @@ fast-glob = "1"
 rust-apt = {version="0.10.0", features=["serde"]}
 serde_json = "1"
 serde = "1"
+anyhow = "1.0.102"
