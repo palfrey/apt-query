@@ -2,6 +2,7 @@
 name = "apt-query"
 version = "0.1.0"
 edition = "2024"
+license="AGPL3"
 
 [dependencies]
 fast-glob = "1"
