@@ -41,9 +41,17 @@ fn run(patterns: Vec<String>) -> Result<Vec<String>, Error> {
 
 fn main() {
     let patterns = args().skip(1).collect::<Vec<_>>();
-    if let Err(err) = run(patterns) {
-        println!("Error: {err}");
-        exit(1);
+    match run(patterns) {
+        Err(err) => {
+            println!("Error: {err}");
+            exit(1);
+        }
+        Ok(mut matches) => {
+            matches.sort();
+            for item in matches {
+                println!("{item}");
+            }
+        }
     }
 }
 
